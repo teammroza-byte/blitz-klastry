@@ -1,0 +1,24 @@
+{
+  "name": "blitz-klastry",
+  "version": "1.0.0",
+  "description": "Blokowanie wybranych klastrów World of Tanks Blitz przez plik hosts",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "pl.blitzklastry.app",
+    "productName": "Blitz Klastry",
+    "files": ["main.js", "preload.js", "hosts.js", "app/**/*"],
+    "win": {
+      "target": "portable",
+      "requestedExecutionLevel": "requireAdministrator"
+    },
+    "portable": { "requestExecutionLevel": "admin" }
+  }
+}
