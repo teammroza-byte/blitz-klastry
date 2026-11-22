@@ -52,7 +52,9 @@ function buildHosts(text, managedDomains, toBlock) {
   while (out.length && out[out.length - 1].trim() === '') out.pop();
   const block = [...new Set(toBlock.map(norm))].filter(Boolean);
   if (block.length) {
-    out.push('', START, ...block.map((d) => `0.0.0.0 ${d}`), END);
+    if (out.length && !(out.length === 1 && out[0] === '')) out.push('');
+    while (out.length && out[0] === '') out.shift();
+    out.push(START, ...block.map((d) => `0.0.0.0 ${d}`), END);
   }
   return out.join(eol) + eol;
 }

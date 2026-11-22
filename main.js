@@ -14,6 +14,16 @@ const backupFile = () => path.join(app.getPath('userData'), 'hosts.kopia');
 
 let win = null;
 
+// Brak pliku hosts to nie błąd – Windows działa i bez niego. Traktujemy go jak pusty.
+async function readHosts() {
+  try {
+    return await fs.readFile(HOSTS, 'utf8');
+  } catch (e) {
+    if (e && e.code === 'ENOENT') return '';
+    throw e;
+  }
+}
+
 function run(cmd, args, timeout = 15000) {
   return new Promise((resolve) => {
     execFile(cmd, args, { timeout, windowsHide: true, encoding: 'utf8' }, (err, stdout, stderr) =>
@@ -51,7 +61,7 @@ function createWindow() {
 // Które z podanych domen są teraz zablokowane
 ipcMain.handle('state', async (_e, domains) => {
   try {
-    const text = await fs.readFile(HOSTS, 'utf8');
+    const text = await readHosts();
     let hasBackup = false;
     try { await fs.access(backupFile()); hasBackup = true; } catch { /* brak kopii */ }
     return { ok: true, blocked: [...blockedDomains(text, domains)], hosts: HOSTS, hasBackup };
@@ -63,7 +73,7 @@ ipcMain.handle('state', async (_e, domains) => {
 // Zapisuje nowy stan blokad
 ipcMain.handle('apply', async (_e, { managed, block }) => {
   try {
-    const text = await fs.readFile(HOSTS, 'utf8');
+    const text = await readHosts();
     // Kopia oryginału przy pierwszej zmianie
     try { await fs.access(backupFile()); } catch { await fs.writeFile(backupFile(), text, 'utf8'); }
     const next = buildHosts(text, managed, block);
@@ -72,7 +82,7 @@ ipcMain.handle('apply', async (_e, { managed, block }) => {
       await fs.writeFile(HOSTS, next, 'utf8');
     }
     if (process.platform === 'win32') await run('ipconfig', ['/flushdns']);
-    const check = blockedDomains(await fs.readFile(HOSTS, 'utf8'), managed);
+    const check = blockedDomains(await readHosts(), managed);
     const missing = block.filter((d) => !check.has(d.toLowerCase()));
     if (missing.length) return { ok: false, error: 'Antywirus cofnął zmiany w pliku hosts. Dodaj wyjątek dla Blitz Klastry albo dla pliku hosts.' };
     return { ok: true, blocked: [...check] };
