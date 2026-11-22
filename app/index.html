@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blitz Klastry</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>Blitz Klastry</h1>
+      <p class="sub" id="status">Wczytywanie…</p>
+    </div>
+    <div class="regions" role="group" aria-label="Serwer" id="regions"></div>
+  </header>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <main>
+    <div class="list-head">
+      <span>Klaster</span>
+      <span>Ping</span>
+      <span>Stan</span>
+    </div>
+    <ul class="clusters" id="clusters"></ul>
+
+    <form class="add" id="addForm">
+      <label for="addInput">Dodaj klaster</label>
+      <input id="addInput" placeholder="np. login5.wotblitz.eu" spellcheck="false" autocomplete="off">
+      <button class="btn" type="submit">Dodaj</button>
+    </form>
+
+    <section class="tips">
+      <h2>Zanim zagrasz</h2>
+      <ul>
+        <li>Zamknij grę przed zmianą i uruchom ją ponownie po kliknięciu „Zastosuj”.</li>
+        <li>Jeśli gra dalej łączy z zablokowanym klastrem, odczekaj około 20 minut przed ponownym zalogowaniem.</li>
+        <li>Zostaw otwarte co najmniej dwa klastry. Gdy jedyny otwarty klaster ma restart (zwykle po północy), nie zalogujesz się, dopóki się nie skończy.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="bar">
+    <div class="bar-left">
+      <button class="btn ghost" id="btnPing">Zmierz ping</button>
+      <button class="btn ghost" id="btnCopy" title="Lista do wklejenia w filtr DNS na telefonie (np. NextDNS)">Kopiuj domeny</button>
+      <button class="btn ghost" id="btnMore" aria-haspopup="true" aria-expanded="false">Więcej ▾</button>
+      <div class="menu" id="menu" hidden>
+        <button data-act="unblock-all">Odblokuj wszystkie</button>
+        <button data-act="restore">Przywróć kopię pliku hosts</button>
+        <button data-act="open-hosts">Otwórz plik hosts</button>
+      </div>
+    </div>
+    <div class="bar-right">
+      <span class="pending" id="pending"></span>
+      <button class="btn primary" id="btnApply" disabled>Zastosuj</button>
+      <span class="version" id="version"></span>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
