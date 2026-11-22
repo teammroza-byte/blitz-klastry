@@ -1,6 +1,6 @@
 'use strict';
 
-const APP_VERSION = 'v1.1';
+const APP_VERSION = 'v1.2';
 
 // Klastry wg strony pomocy Wargaming (PingPlotter). Lokalizacje EU wg graczy –
 // prawdziwą odległość pokazuje ping.
@@ -48,7 +48,8 @@ const S = {
   pinging: false,
   busy: false,
   hasBackup: false,
-  error: null
+  error: null,
+  locked: false   // true tylko gdy nie da się odczytać stanu blokad
 };
 
 // W przeglądarce (bez .exe) – atrapa do podglądu wyglądu
@@ -97,8 +98,10 @@ async function loadState() {
   const res = await api.state(allDomains());
   if (!res.ok) {
     S.error = res.error;
+    S.locked = true;
   } else {
     S.error = null;
+    S.locked = false;
     S.saved = new Set(res.blocked.map(norm));
     S.desired = new Set(S.saved);
     S.hasBackup = !!res.hasBackup;
@@ -166,7 +169,7 @@ function render() {
 
   const list = clusters();
   const blockedHere = list.filter((c) => S.saved.has(c.domain)).length;
-  $('#status').textContent = S.error ? 'Nie udało się odczytać pliku hosts'
+  $('#status').textContent = S.locked ? 'Nie udało się odczytać pliku hosts'
     : blockedHere ? `Zablokowane klastry ${DEFAULT_REGIONS[S.region].name}: ${blockedHere} z ${list.length}`
     : `Wszystkie klastry ${DEFAULT_REGIONS[S.region].name} są otwarte`;
 
@@ -196,7 +199,7 @@ function render() {
         </div>
         ${pingCell(c)}
         <label class="toggle">
-          <input type="checkbox" data-domain="${esc(c.domain)}" ${on ? 'checked' : ''} ${S.error ? 'disabled' : ''}>
+          <input type="checkbox" data-domain="${esc(c.domain)}" ${on ? 'checked' : ''} ${S.locked ? 'disabled' : ''}>
           <span class="track" aria-hidden="true"></span>
           <span class="t-label">${on ? 'Zablokowany' : 'Otwarty'}</span>
         </label>
@@ -207,7 +210,7 @@ function render() {
   const pend = pendingCount();
   $('#pending').textContent = pend ? `Niezapisane zmiany: ${pend}` : '';
   const btn = $('#btnApply');
-  btn.disabled = !pend || S.busy || !!S.error;
+  btn.disabled = !pend || S.busy || S.locked;
   btn.textContent = S.busy ? 'Zapisywanie…' : 'Zastosuj';
   $('#btnPing').disabled = S.pinging;
   $('#btnPing').textContent = S.pinging ? 'Mierzenie…' : 'Zmierz ping';
